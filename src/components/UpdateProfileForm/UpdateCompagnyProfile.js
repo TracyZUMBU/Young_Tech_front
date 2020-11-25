@@ -47,6 +47,7 @@ const UpdateCompagnyForm = (props) => {
   //send new user's details to the BDD
   const onSubmit = async (values) => {
     delete values["repeat_password"];
+    
     //remove empty string from the objects "values" in order to add into the BDD only values' fields provided
     Object.keys(values).forEach(
       (key) => values[key] === "" && delete values[key]
