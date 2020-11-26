@@ -7,18 +7,11 @@ import decode from "jwt-decode";
 import Button from "../components/Button";
 
 const JobContent = (props) => {
-  const {
-    idJob,
-    compagny_id,
-    description_compagny,
-    description_position,
-    prerequisite,
-    userType,
-  } = props;
+  const {idJob, compagny_id, description_compagny, description_position, prerequisite, userType} = props
 
   // get user'id from localstorage
-  const token = localStorage.getItem("token");
-  const { userID } = decode(token);
+  const token = localStorage.getItem("token")
+  const {userID} = decode(token)
 
   //handle the modal and the response from the back when deleting something
   const [modalIsOpen, setmodalIsOpen] = useState(false);
@@ -34,57 +27,45 @@ const JobContent = (props) => {
     setmodalIsOpen(false);
     switch (userType) {
       case "compagny":
-        try {
-          const urlAdmin = `http://localhost:4040/compagny/deleteOffer/${idJob}`;
-          await axios({
-            method: "DELETE",
-            url: urlAdmin,
-            headers: {
-              "Content-Type": "application/json",
-              "x-access-token": token,
-            },
-          }).then((res) => setResponse(res.data));
-        } catch {
-          alert("L'offre n'a pas pu être supprimé");
-        }
-      case "admin":
-        try {
-          const urlAdmin = `http://localhost:4040/compagny/deleteOffer/${idJob}`;
-          await axios({
-            method: "DELETE",
-            url: urlAdmin,
-            headers: {
-              "Content-Type": "application/json",
-              "x-access-token": token,
-            },
-          }).then((res) => setResponse(res.data));
-        } catch {
-          alert("L'offre n'a pas pu être supprimé");
-        }
-
-      case "user":
-        try {
-          const urlUser = `http://localhost:4040/users/deleteApplication/${userID}/${idJob}`;
-          await axios({
-            method: "DELETE",
-            url: urlUser,
-            headers: {
-              "Content-Type": "application/json",
-              "x-access-token": token,
-            },
-          }).then((res) => {
-            if (res.status === 200) {
-              alert("Votre candidature a été supprimer");
-              window.location.reload()
-            }
+        const urlCompagny = `http://localhost:4040/compagny/deleteOffer/${idJob}`;
+        await axios({
+          method: "DELETE",
+          url: urlCompagny,
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token,
+          },
+        })
+          .then((res) => setResponse(res.data))
+          .catch((error) => {
+            console.log("error:", error);
           });
-        } catch {
-          alert("Votre candidature n'a pas pu être supprimer");
-        }
+          case "admin":
+            const urlAdmin = `http://localhost:4040/compagny/deleteOffer/${idJob}`;
+            await axios({
+              method: "DELETE",
+              url: urlAdmin,
+              headers: {
+                "Content-Type": "application/json",
+                "x-access-token": token,
+              },
+            })
+              .then((res) => setResponse(res.data))
+              .catch((error) => {
+                console.log("error:", error);
+              });
+      case "user":
+        
+        const urlUser = `http://localhost:4040/users/deleteApplication/${userID}/${idJob}`;
+        axios.delete(urlUser).then((res) => setResponse(res.data));
         break;
       default:
         break;
     }
+    setInterval(function() {
+      window.location.reload();
+    }, 300);
+    //re-render force
   };
 
   return (
@@ -118,7 +99,7 @@ const JobContent = (props) => {
                 <Link
                   to={{
                     pathname: `/updatead/${idJob}`,
-                    state: { compagny_id: true },
+                    state: { compagny_id: true }
                   }}
                   className="btn btn--grey"
                 >
@@ -134,10 +115,10 @@ const JobContent = (props) => {
               ) : null}
 
               {/* element available for user only */}
-              {userType === "user" ? (
+              {userType === "user"  ? (
                 <Button
                   value={"Retirer sa candidature"}
-                  className="btn btn-round"
+                  className="btn"
                   action={handleModale}
                 />
               ) : null}

@@ -28,6 +28,22 @@ const SignIn = () => {
     password: Yup.string().required(errormsg),
   });
 
+  // function that redirect user when successful login
+  // const goToUserProfilePage = (userType, userID) => {
+  //   switch (userType) {
+  //     case "admin":
+  //       history.push(`/admin/${userID}`);
+  //       break;
+  //     case "user":
+  //       history.push(`/user/${userID}`);
+  //       break;
+  //     case "compagny":
+  //       history.push(`/compagny/${userID}`);
+  //       break;
+  //     default:
+  //       return <Redirect to={"/"} />;
+  //   }
+  // };
 
   const onSubmit = async (values) => {
     const url = "http://localhost:4040/signin/signin";
@@ -60,6 +76,7 @@ const SignIn = () => {
                 validateOnMount
               >
                 {(formik) => {
+                  //console.log("formik:", formik);
                   return (
                     <Form className="signIn__form">
                       <h1 className="heading-primary--main">Se connecter</h1>

@@ -74,24 +74,19 @@ const AdminProfile = () => {
   // handle deletation of user/compagny depending on is type
   const handleDelete = async () => {
     setmodalIsOpen(false);
-    try {
-      const url = `http://localhost:4040/allpeople/deleteUserAccount/${userToDelete}`;
-      await axios({
-        method: "DELETE",
-        url: url,
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": token,
-        },
-      }).then((res) => {
-        setResponse(res.data);
-        if(res.status=== 200){
-          alert("l'utilisateur à été supprimé")
-        }
+    const url = `http://localhost:4040/allpeople/deleteUserAccount/${userToDelete}`;
+    await axios({
+      method: "DELETE",
+      url: url,
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": token,
+      },
+    })
+      .then((res) => setResponse(res.data))
+      .catch((error) => {
+        console.log("error:", error);
       });
-    } catch{
-      alert("L'utilisateur n'a pas pu être supprimé")
-    }
   };
 
   return (
