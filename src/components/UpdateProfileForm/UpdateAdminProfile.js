@@ -12,13 +12,14 @@ const UpdateAdminProfile = (props) => {
   //get the user's id form localstorage
   const token = localStorage.getItem("token");
   const { userID } = decode(token);
+  const phoneRegex = /^(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/
 
   const [response, setResponse] = useState();
 
   // get user's details from userProfile component
   const userDetails = props.userDetails;
   //set the values of the form with userDetails content
-  const values = {
+  const initialValues = {
     first_name: userDetails.first_name,
     last_name: userDetails.last_name,
     email: userDetails.email,
@@ -34,54 +35,75 @@ const UpdateAdminProfile = (props) => {
     type: Yup.string(),
     email: Yup.string().email("Le format de l'email est incorrect"),
     password: Yup.string(),
-    repeat_password: Yup.string().oneOf(
-      [Yup.ref("password"), ""],
-      "Les mots de passe doivent être indentiques"
-    ),
-    phone: Yup.string(),
+    repeat_password: Yup.string()
+      .oneOf(
+        [Yup.ref("password"), ""],
+        "Les mots de passe doivent être indentiques"
+      )
+      .when("password", {
+        is: (password) => password,
+        then: Yup.string().required(
+          "Veuillez de nouveau saisir votre mot de passe"
+        ),
+      }),
+    phone: Yup.string().matches(phoneRegex, 'Le format du numéro de téléphone est incorrect'),
   });
 
-  const onSubmit = async (values) => {
+  function keepOnlyChangedValues(object1, object2) {
+    const keys1 = Object.keys(object1);
+
+    for (let key of keys1) {
+      if (object1[key] === object2[key]) {
+        delete object2[key];
+      }
+    }
+  }
+
+  const onSubmit = async (values, onSubmitProps) => {
+    keepOnlyChangedValues(initialValues, values);
+
     delete values["repeat_password"];
-    //remove empty string from the objects "values" in order to add into the BDD only values' fields provided
-    Object.keys(values).forEach(
-      (key) => values[key] === "" && delete values[key]
-      );
-      
-      console.log('values:', values)
-    const url = `http://localhost:4040/allpeople/updateProfile/${userID}`;
-    await axios({
-      method: "PUT",
-      url: url,
-      data: values,
-      headers: {
-        "Content-Type": "application/json",
-        "x-access-token": token,
-      },
-    })
-      .then((res) => {
-        setResponse(res)
-        if(res.status === 200){
-          alert('Vos données ont été modifiées')
-      }})
-      .catch(() => {
-        alert("Vos données n'ont pas été modifiées")
-      });
-    //window.location.reload()
+
+    const confirmChoice = window.confirm(
+      "Etes-vous sûr de vouloir modifier vos données ? "
+    );
+
+    try {
+      if (confirmChoice) {
+        const url = `http://localhost:4040/allpeople/updateProfile/${userID}`;
+        await axios({
+          method: "PUT",
+          url: url,
+          data: values,
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token,
+          },
+        }).then((res) => {
+          if (res.status === 200) {
+            alert("Vos données ont été modifiées");
+            window.location.reload();
+          }
+        });
+      } else {
+        onSubmitProps.resetForm();
+      }
+    } catch {
+      alert("Vos données n'ont pas pu être modifiées");
+    }
   };
 
-  
   return (
     <div>
       {!userDetails.logo ? null : (
         <Formik
-          initialValues={values}
+          initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={onSubmit}
           enableReinitialize
         >
           {(formik) => {
-            console.log("formik:", formik);
+
             return (
               <Form className="signIn__form">
                 <FormikControl
